@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, ChevronDown, Bell, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, ChevronDown, Bell, Search, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const { user, signout, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -13,57 +17,65 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { name: 'Home', href: '#', hasDropdown: false },
+    { name: 'Home', path: '/', hasDropdown: false },
     {
       name: 'News',
-      href: '#',
+      path: '/news',
       hasDropdown: true,
       items: [
-        'General',
-        'Announcement',
-        'Events',
-        'Academics',
-        'Sports',
-        'Entertainments'
+        { name: 'Announcement', path: '/announcement' },
+        { name: 'Events', path: '/events' },
+        { name: 'Academics', path: '/academics' },
+        { name: 'Sports', path: '/sports' },
+        { name: 'Entertainments', path: '/entertainments' }
       ]
     },
-    { name: 'Confessions', href: '#', hasDropdown: false },
+    { name: 'Confessions', path: '/confessions', hasDropdown: false },
     {
       name: 'Marketplace',
-      href: '#',
+      path: '/marketplace',
       hasDropdown: true,
       items: [
-        'All Products',
-        'Phones & Gadgets',
-        'Computer & Accessories',
-        'Hostel Items',
-        'Food & Snacks',
-        'Services (Hair, Makeup, Laundry)',
-        'Clothes & Thrift'
+        { name: 'All Products', path: '/marketplace' },
+        { name: 'Phones & Gadgets', path: '/marketplace/phones' },
+        { name: 'Computer & Accessories', path: '/marketplace/computers' },
+        { name: 'Hostel Items', path: '/marketplace/hostel-items' },
+        { name: 'Food & Snacks', path: '/marketplace/food' },
+        { name: 'Services (Hair, Makeup, Laundry)', path: '/marketplace/services' },
+        { name: 'Clothes & Thrift', path: '/marketplace/clothes' }
       ]
     },
     {
       name: 'Forum',
-      href: '#',
+      path: '/forum',
       hasDropdown: true,
       items: [
-        'All Forums',
-        'Department Groups',
-        'Hostel Groups',
-        'Buy and Sell Chat',
-        'Event Chats'
+        { name: 'All Forums', path: '/forum' },
+        { name: 'Department Groups', path: '/forum/departments' },
+        { name: 'Hostel Groups', path: '/forum/hostels' },
+        { name: 'Buy and Sell Chat', path: '/forum/buy-sell' },
+        { name: 'Event Chats', path: '/forum/events' }
       ]
     },
     {
       name: 'Resources',
-      href: '#',
+      path: '/resources',
       hasDropdown: true,
-      items: ['Hostel Finder', 'Lost & Found']
+      items: [
+        { name: 'Hostel Finder', path: '/hostels' },
+        { name: 'Lost & Found', path: '/lost-and-found' }
+      ]
     }
   ];
 
   const toggleDropdown = (index) => {
     setActiveDropdown(activeDropdown === index ? null : index);
+  };
+
+  const handleLogout = () => {
+    signout();
+    navigate('/');
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -79,7 +91,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
 
           {/* LOGO */}
-          <div className="flex items-center gap-3 cursor-pointer">
+          <Link to="/" className="flex items-center gap-3 cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[hsl(var(--primary))] to-[hsl(var(--secondary))] flex items-center justify-center text-white font-bold text-xl">
               A
             </div>
@@ -89,7 +101,7 @@ export default function Navbar() {
                 Campus Portal
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* DESKTOP NAV */}
           <div className="hidden lg:flex flex-1 justify-center">
@@ -126,24 +138,24 @@ export default function Navbar() {
                       >
                         <div className="bg-[hsl(var(--background))] rounded-2xl border border-white/10 backdrop-blur-xl p-2">
                           {item.items.map((sub, i) => (
-                            <a
+                            <Link
                               key={i}
-                              href="#"
+                              to={sub.path}
                               className="block px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5"
                             >
-                              {sub}
-                            </a>
+                              {sub.name}
+                            </Link>
                           ))}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <a
-                      href={item.href}
+                    <Link
+                      to={item.path}
                       className="px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5"
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   )}
                 </div>
               ))}
@@ -157,12 +169,40 @@ export default function Navbar() {
               <Bell className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[hsl(var(--primary))] rounded-full" />
             </div>
-            <button className="px-4 py-2 rounded-full border border-white/10 text-sm text-white hover:bg-white/10">
-              Login
-            </button>
-            <button className="px-5 py-2 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] text-sm font-semibold text-white">
-              Sign Up
-            </button>
+            
+            {/* Conditional Auth Buttons */}
+            {isAuthenticated() ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                  <User className="w-4 h-4 text-[hsl(var(--primary))]" />
+                  <span className="text-sm text-white">{user?.fullName}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 rounded-full border border-white/10 text-sm text-white hover:bg-white/10 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  to="/signin" 
+                  state={{ page: 'signin' }}
+                  className="px-4 py-2 rounded-full border border-white/10 text-sm text-white hover:bg-white/10"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/signup" 
+                  state={{ page: 'signup' }}
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] text-sm font-semibold text-white"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* MOBILE MENU BUTTON */}
@@ -205,35 +245,65 @@ export default function Navbar() {
                   >
                     <div className="pl-4 border-l border-white/10 ml-3">
                       {item.items.map((sub, i) => (
-                        <a
+                        <Link
                           key={i}
-                          href="#"
+                          to={sub.path}
+                          onClick={() => setIsMobileMenuOpen(false)}
                           className="block px-4 py-3 text-sm text-gray-400 hover:text-white"
                         >
-                          {sub}
-                        </a>
+                          {sub.name}
+                        </Link>
                       ))}
                     </div>
                   </div>
                 </>
               ) : (
-                <a
-                  href={item.href}
+                <Link
+                  to={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className="block w-full text-left px-4 py-3 text-lg text-white rounded-xl hover:bg-white/5"
                 >
                   {item.name}
-                </a>
+                </Link>
               )}
             </div>
           ))}
 
           <div className="pt-6 space-y-3">
-            <button className="w-full py-3 border border-white/20 rounded-xl text-white">
-              Login
-            </button>
-            <button className="w-full py-3 rounded-xl bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] text-white">
-              Sign Up Free
-            </button>
+            {isAuthenticated() ? (
+              <>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10">
+                  <User className="w-5 h-5 text-[hsl(var(--primary))]" />
+                  <span className="text-white">{user?.fullName}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-center gap-2 w-full py-3 border border-white/20 rounded-xl text-white hover:bg-white/10"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/signin" 
+                  state={{ page: 'signin' }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full text-center py-3 border border-white/20 rounded-xl text-white"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/signup" 
+                  state={{ page: 'signup' }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] text-white"
+                >
+                  Sign Up Free
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
