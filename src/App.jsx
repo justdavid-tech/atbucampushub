@@ -13,6 +13,7 @@ import Events from './pages/events'
 import Academics from './pages/academics'
 import Sports from './pages/sports'
 import Entertainments from './pages/entertainments'
+import ConfessionsPage from './pages/confessions'
 
 // Sign In and Sign Out
 import SignUpPage from './pages/SignUpPage' 
@@ -34,6 +35,7 @@ function App() {
           <Route path="/entertainments" element={<Entertainments />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
+          <Route path="/confessions" element={<ConfessionsPage />} />
       </Routes>
     </AuthProvider>
   )
