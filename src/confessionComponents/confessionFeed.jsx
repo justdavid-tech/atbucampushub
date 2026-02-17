@@ -80,7 +80,7 @@ export default function ConfessionsFeed({ onConfessionClick, topConfession }) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-400">Loading confessions...</p>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function ConfessionsFeed({ onConfessionClick, topConfession }) {
 
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-4">
-                <span className="text-purple-400 font-semibold">{topConfession.anonId}</span>
+                <span className="text-primary font-semibold">{topConfession.anonId}</span>
                 <span className="text-gray-500">•</span>
                 <span className="text-gray-400">{formatTimeAgo(topConfession.createdAt)}</span>
               </div>
@@ -143,7 +143,7 @@ export default function ConfessionsFeed({ onConfessionClick, topConfession }) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all cursor-pointer"
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-primary focus:bg-white/10 transition-all cursor-pointer"
           >
             <option value="latest" className="bg-[hsl(var(--background))]">Latest First</option>
             <option value="popular" className="bg-[hsl(var(--background))]">Most Liked</option>
@@ -169,7 +169,7 @@ export default function ConfessionsFeed({ onConfessionClick, topConfession }) {
             <article
               key={confession._id}
               onClick={() => onConfessionClick(confession)}
-              className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300 cursor-pointer hover:scale-[1.01]"
+              className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-primary/30 transition-all duration-300 cursor-pointer hover:scale-[1.01]"
               style={{
                 animation: `fadeInUp 0.5s ease-out ${index * 0.05}s both`
               }}
@@ -183,7 +183,7 @@ export default function ConfessionsFeed({ onConfessionClick, topConfession }) {
               <div className="flex items-center justify-between">
                 {/* Author & Time */}
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="text-purple-400 font-semibold">{confession.anonId}</span>
+                  <span className="text-primary font-semibold">{confession.anonId}</span>
                   <span className="text-gray-600">•</span>
                   <div className="flex items-center gap-1 text-gray-400">
                     <Clock className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export default function ConfessionsFeed({ onConfessionClick, topConfession }) {
               </div>
 
               {/* Hover Glow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
             </article>
           ))}
         </div>

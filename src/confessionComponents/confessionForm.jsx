@@ -56,10 +56,15 @@ export default function ConfessionForm({ onSuccess }) {
       // Submit confession
       // NOTE: For full IP tracking, this should go through a serverless function
       // For now, we'll submit with limited metadata
-      await submitConfession(text, {
+      const result = await submitConfession(text, {
         ip: 'client-side', // In production, get from serverless function
         location: 'Nigeria' // In production, get from IP geolocation
       });
+
+      // Track ownership in localStorage
+      const myConfessions = JSON.parse(localStorage.getItem('atbu_my_confessions') || '[]');
+      myConfessions.push(result._id);
+      localStorage.setItem('atbu_my_confessions', JSON.stringify(myConfessions));
 
       // Success!
       setShowSuccess(true);
@@ -87,7 +92,7 @@ export default function ConfessionForm({ onSuccess }) {
       <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
             <Send className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -106,7 +111,7 @@ export default function ConfessionForm({ onSuccess }) {
               placeholder="What's on your mind? Share your thoughts, feelings, or experiences..."
               className={`w-full min-h-[200px] px-4 py-3 bg-white/5 border ${
                 hasProfanity ? 'border-red-500/50' : 'border-white/10'
-              } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all resize-none`}
+              } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-white/10 transition-all resize-none`}
               disabled={isSubmitting}
             />
 
@@ -162,7 +167,7 @@ export default function ConfessionForm({ onSuccess }) {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || !text.trim() || hasProfanity || charCount < 10}
-              className="relative px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="relative px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white rounded-xl font-semibold overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(239,45,86,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <span className="relative z-10 flex items-center gap-2">
                 {isSubmitting ? (

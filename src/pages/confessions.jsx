@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { isPostingDay, getConfessionStats, getTopConfession } from '../lib/confessionQueries';
+import { useSearchParams } from 'react-router-dom';
+import { isPostingDay, getConfessionStats, getTopConfession, getConfessionById } from '../lib/confessionQueries';
 
 // Imported confession components
 import ConfessionHero from '../confessionComponents/confessionHero';
@@ -16,16 +17,32 @@ export default function ConfessionsPage() {
   const [stats, setStats] = useState(null);
   const [topConfession, setTopConfession] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     loadStats();
     loadTopConfession();
+    handleDeepLink();
   }, [refreshKey]);
 
   useEffect(() => {
     // Auto-show form if it's posting day
     setShowForm(isPostingDay());
   }, []);
+
+  const handleDeepLink = async () => {
+    const confessionId = searchParams.get('id');
+    if (confessionId && !selectedConfession) {
+      try {
+        const data = await getConfessionById(confessionId);
+        if (data) {
+          setSelectedConfession(data);
+        }
+      } catch (error) {
+        console.error('Error loading deep linked confession:', error);
+      }
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -58,10 +75,14 @@ export default function ConfessionsPage() {
 
   const handleConfessionClick = (confession) => {
     setSelectedConfession(confession);
+    // Sync URL with confession ID
+    setSearchParams({ id: confession._id });
   };
 
   const handleCloseModal = () => {
     setSelectedConfession(null);
+    // Clear query param
+    setSearchParams({});
     // Refresh in case likes/replies changed
     setRefreshKey(prev => prev + 1);
   };

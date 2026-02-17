@@ -3,15 +3,33 @@
 // ============================================
 // All Sanity queries for confessions
 
-import {client} from './sanity'
+import { client } from './sanity'
 
 /**
- * Helper: Generate Anonymous ID
- * Creates unique "Anon #XXXX" identifier
+ * Helper: Generate or Get Consistent Anonymous ID
+ * Each device/session gets ONE permanent Anon #XXXX
+ * This stays the same across all their posts and replies
  */
-export function generateAnonId() {
-  const random = Math.floor(1000 + Math.random() * 9000)
-  return `Anon #${random}`
+export function getAnonId() {
+  // Check if this device already has an Anon ID
+  let anonId = localStorage.getItem('atbu_anon_id')
+
+  if (!anonId) {
+    // First time - generate new one
+    const random = Math.floor(1000 + Math.random() * 9000)
+    anonId = `Anon #${random}`
+    localStorage.setItem('atbu_anon_id', anonId)
+  }
+
+  return anonId
+}
+
+/**
+ * Helper: Reset Anonymous ID (for testing or if user wants new identity)
+ */
+export function resetAnonId() {
+  localStorage.removeItem('atbu_anon_id')
+  return getAnonId() // Generate new one
 }
 
 /**
@@ -20,12 +38,12 @@ export function generateAnonId() {
  */
 export function getSessionId() {
   let sessionId = localStorage.getItem('atbu_session_id')
-  
+
   if (!sessionId) {
     sessionId = 'sess_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
     localStorage.setItem('atbu_session_id', sessionId)
   }
-  
+
   return sessionId
 }
 
@@ -50,13 +68,14 @@ export function isPostingDay() {
   return true // Always allow posting (for testing)
 }
 
+
 /**
  * Helper: Get next posting day
  */
 export function getNextPostingDay() {
   const today = new Date()
   const currentDay = today.getDay()
-  
+
   let daysUntilNext
   if (currentDay < 2) {
     daysUntilNext = 2 - currentDay // Until Tuesday
@@ -65,11 +84,11 @@ export function getNextPostingDay() {
   } else {
     daysUntilNext = (7 - currentDay) + 2 // Until next Tuesday
   }
-  
+
   const nextDate = new Date(today)
   nextDate.setDate(today.getDate() + daysUntilNext)
   nextDate.setHours(0, 0, 0, 0)
-  
+
   return nextDate
 }
 
@@ -98,7 +117,7 @@ export async function isUserBanned(ip, sessionId) {
       !defined(expiresAt) || expiresAt > now()
     )][0]
   `
-  
+
   try {
     const banned = await client.fetch(query, { ip, sessionId })
     return !!banned
@@ -115,14 +134,14 @@ export async function isUserBanned(ip, sessionId) {
  */
 export async function getConfessions(sortBy = 'latest', limit = 50) {
   let orderBy = 'createdAt desc'
-  
+
   if (sortBy === 'popular') {
     orderBy = 'likes desc'
   } else if (sortBy === 'trending') {
     // Trending = high likes + recent
     orderBy = 'likes desc, createdAt desc'
   }
-  
+
   const query = `
     *[_type == "confession" && status == "approved"] | order(${orderBy}) [0...$limit] {
       _id,
@@ -136,7 +155,7 @@ export async function getConfessions(sortBy = 'latest', limit = 50) {
       year
     }
   `
-  
+
   try {
     const confessions = await client.fetch(query, { limit })
     return confessions
@@ -157,10 +176,13 @@ export async function getConfessionById(confessionId) {
       anonId,
       likes,
       replies[] {
+        "_key": _key,
+        replyId,
         text,
         anonId,
         timestamp,
-        likes
+        likes,
+        parentReplyId
       },
       isTopConfession,
       createdAt,
@@ -168,7 +190,7 @@ export async function getConfessionById(confessionId) {
       year
     }
   `
-  
+
   try {
     const confession = await client.fetch(query, { confessionId })
     return confession
@@ -184,7 +206,7 @@ export async function getConfessionById(confessionId) {
 export async function getTopConfession() {
   const currentWeek = getWeekNumber()
   const currentYear = new Date().getFullYear()
-  
+
   const query = `
     *[_type == "confession" && status == "approved" && weekNumber == $week && year == $year] | order(likes desc) [0] {
       _id,
@@ -196,11 +218,11 @@ export async function getTopConfession() {
       createdAt
     }
   `
-  
+
   try {
-    const topConfession = await client.fetch(query, { 
-      week: currentWeek, 
-      year: currentYear 
+    const topConfession = await client.fetch(query, {
+      week: currentWeek,
+      year: currentYear
     })
     return topConfession
   } catch (error) {
@@ -215,20 +237,26 @@ export async function getTopConfession() {
 export async function getConfessionStats() {
   const currentWeek = getWeekNumber()
   const currentYear = new Date().getFullYear()
-  
+
   const query = `{
     "total": count(*[_type == "confession" && status == "approved"]),
     "thisWeek": count(*[_type == "confession" && status == "approved" && weekNumber == $week && year == $year]),
-    "totalLikes": sum(*[_type == "confession" && status == "approved"].likes),
-    "totalReplies": sum(*[_type == "confession" && status == "approved"]{ "count": count(replies) }.count)
+    "likes": *[_type == "confession" && status == "approved"].likes,
+    "replies": *[_type == "confession" && status == "approved"]{ "count": count(replies) }.count
   }`
-  
+
   try {
-    const stats = await client.fetch(query, { 
-      week: currentWeek, 
-      year: currentYear 
+    const data = await client.fetch(query, {
+      week: currentWeek,
+      year: currentYear
     })
-    return stats
+
+    return {
+      total: data.total || 0,
+      thisWeek: data.thisWeek || 0,
+      totalLikes: (data.likes || []).reduce((a, b) => a + (b || 0), 0),
+      totalReplies: (data.replies || []).reduce((a, b) => a + (b || 0), 0)
+    }
   } catch (error) {
     console.error('Error fetching stats:', error)
     return {
@@ -250,24 +278,24 @@ export async function submitConfession(text, metadata = {}) {
   if (containsProfanity(text)) {
     throw new Error('Your confession contains inappropriate language. Please revise.')
   }
-  
+
   // Check posting day
   if (!isPostingDay()) {
     throw new Error('Confessions can only be posted on Tuesdays and Fridays.')
   }
-  
+
   // Check ban status
   const sessionId = getSessionId()
   const isBanned = await isUserBanned(metadata.ip || '', sessionId)
-  
+
   if (isBanned) {
     throw new Error('You are temporarily banned from posting.')
   }
-  
+
   const confession = {
     _type: 'confession',
     text: text.trim(),
-    anonId: generateAnonId(),
+    anonId: getAnonId(),
     likes: 0,
     replies: [],
     status: 'approved', // Auto-approve
@@ -284,7 +312,7 @@ export async function submitConfession(text, metadata = {}) {
       deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
     }
   }
-  
+
   try {
     const result = await client.create(confession)
     return result
@@ -304,7 +332,7 @@ export async function likeConfession(confessionId) {
   if (localStorage.getItem(likedKey)) {
     throw new Error('You already liked this confession')
   }
-  
+
   try {
     // Increment like count in Sanity
     await client
@@ -312,10 +340,10 @@ export async function likeConfession(confessionId) {
       .setIfMissing({ likes: 0 })
       .inc({ likes: 1 })
       .commit()
-    
+
     // Mark as liked locally
     localStorage.setItem(likedKey, 'true')
-    
+
     return true
   } catch (error) {
     console.error('Error liking confession:', error)
@@ -328,17 +356,17 @@ export async function likeConfession(confessionId) {
  */
 export async function unlikeConfession(confessionId) {
   const likedKey = `liked_confession_${confessionId}`
-  
+
   if (!localStorage.getItem(likedKey)) {
     throw new Error('You haven\'t liked this confession')
   }
-  
+
   try {
     await client
       .patch(confessionId)
       .dec({ likes: 1 })
       .commit()
-    
+
     localStorage.removeItem(likedKey)
     return true
   } catch (error) {
@@ -357,23 +385,26 @@ export function hasLikedConfession(confessionId) {
 /**
  * Submit a reply to confession
  */
-export async function submitReply(confessionId, replyText, metadata = {}) {
+export async function submitReply(confessionId, replyText, parentReplyId = null, metadata = {}) {
   if (containsProfanity(replyText)) {
     throw new Error('Your reply contains inappropriate language.')
   }
-  
+
   const sessionId = getSessionId()
   const isBanned = await isUserBanned(metadata.ip || '', sessionId)
-  
+
   if (isBanned) {
     throw new Error('You are temporarily banned from replying.')
   }
-  
+
   const reply = {
+    _key: 'reply_' + Math.random().toString(36).substring(2, 9),
+    replyId: 'reply_' + Math.random().toString(36).substring(2, 15),
     text: replyText.trim(),
-    anonId: generateAnonId(),
+    anonId: getAnonId(),
     timestamp: new Date().toISOString(),
     likes: 0,
+    parentReplyId: parentReplyId,
     metadata: {
       ip: metadata.ip || 'unknown',
       userAgent: navigator.userAgent || 'unknown',
@@ -381,14 +412,14 @@ export async function submitReply(confessionId, replyText, metadata = {}) {
       location: metadata.location || 'unknown'
     }
   }
-  
+
   try {
     await client
       .patch(confessionId)
       .setIfMissing({ replies: [] })
       .append('replies', [reply])
       .commit()
-    
+
     return reply
   } catch (error) {
     console.error('Error submitting reply:', error)
@@ -405,7 +436,7 @@ export async function flagConfession(confessionId) {
       .patch(confessionId)
       .inc({ flagCount: 1 })
       .commit()
-    
+
     // If flagged 5+ times, auto-change status to flagged
     const confession = await getConfessionById(confessionId)
     if (confession && confession.flagCount >= 5) {
@@ -414,10 +445,43 @@ export async function flagConfession(confessionId) {
         .set({ status: 'flagged' })
         .commit()
     }
-    
+
     return true
   } catch (error) {
     console.error('Error flagging confession:', error)
     throw new Error('Failed to report confession')
+  }
+}
+
+/**
+ * Update a confession's text
+ */
+export async function updateConfession(confessionId, newText) {
+  if (containsProfanity(newText)) {
+    throw new Error('Your confession contains inappropriate language.')
+  }
+
+  try {
+    await client
+      .patch(confessionId)
+      .set({ text: newText.trim() })
+      .commit()
+    return true
+  } catch (error) {
+    console.error('Error updating confession:', error)
+    throw new Error('Failed to update confession')
+  }
+}
+
+/**
+ * Delete a confession
+ */
+export async function deleteConfession(confessionId) {
+  try {
+    await client.delete(confessionId)
+    return true
+  } catch (error) {
+    console.error('Error deleting confession:', error)
+    throw new Error('Failed to delete confession')
   }
 }

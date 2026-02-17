@@ -6,73 +6,95 @@
    ================================ */
 
 @layer base {
-  :root {
-    /* ================================
+   :root {
+      /* ================================
        PRIMARY BRAND COLORS
        ================================ */
 
-    /* Main brand background (Navbar, Footer, Dark sections) */
-    --background: 210 45% 12%; /* #022B3A Jet Black */
+      /* Main brand background (Navbar, Footer, Dark sections) */
+      --background: 210 45% 12%;
+      /* #022B3A Jet Black */
 
-    /* Main brand accent / CTA (Sign up, Post, Buy) */
-    --primary: 346 84% 56%; /* #EF2D56 Watermelon */
+      /* Main brand accent / CTA (Sign up, Post, Buy) */
+      --primary: 346 84% 56%;
+      /* #EF2D56 Watermelon */
 
-    /* Secondary action / Highlights (Trending, Badges) */
-    --secondary: 15 96% 49%; /* #F63E02 Blazing Flame */
+      /* Secondary action / Highlights (Trending, Badges) */
+      --secondary: 15 96% 49%;
+      /* #F63E02 Blazing Flame */
 
-    /* Danger / Destructive actions (Delete, Report, Block) */
-    --destructive: 8 83% 32%; /* #95190C Oxblood */
+      /* Danger / Destructive actions (Delete, Report, Block) */
+      --destructive: 8 83% 32%;
+      /* #95190C Oxblood */
 
-    /* ================================
+      /* ================================
        NEUTRAL COLORS (LIGHT MODE)
        ================================ */
 
-    /* Page background */
-    --surface: 0 0% 100%; /* #FFFFFF */
+      /* Page background */
+      --surface: 0 0% 100%;
+      /* #FFFFFF */
 
-    /* Card background */
-    --card: 0 0% 97%; /* #F7F7F7 */
+      /* Card background */
+      --card: 0 0% 97%;
+      /* #F7F7F7 */
 
-    /* Border & divider */
-    --border: 220 13% 91%; /* #E5E7EB */
+      /* Border & divider */
+      --border: 220 13% 91%;
+      /* #E5E7EB */
 
-    /* Primary text */
-    --foreground: 222 47% 11%; /* #111827 */
+      /* Primary text */
+      --foreground: 222 47% 11%;
+      /* #111827 */
 
-    /* Muted text */
-    --muted: 215 16% 47%; /* #6B7280 */
+      /* Muted text */
+      --muted: 215 16% 47%;
+      /* #6B7280 */
 
-    /* ================================
+      /* ================================
        COMPONENT STATES
        ================================ */
 
-    /* Input backgrounds */
-    --input: 0 0% 100%;
+      /* Input backgrounds */
+      --input: 0 0% 100%;
 
-    /* Focus rings */
-    --ring: 346 84% 56%; /* Same as primary */
-  }
+      /* Focus rings */
+      --ring: 346 84% 56%;
+      /* Same as primary */
+   }
 
-  /* ================================
+   /* ================================
      DARK MODE
      ================================ */
-  .dark {
-    /* Main background */
-    --background: 222 47% 8%; /* #0F172A */
+   .dark {
+      /* Main background */
+      --background: 222 47% 8%;
+      /* #0F172A */
 
-    /* Cards */
-    --card: 222 47% 11%; /* Slightly lighter */
+      /* Cards */
+      --card: 222 47% 11%;
+      /* Slightly lighter */
 
-    /* Text */
-    --foreground: 210 40% 96%; /* #E5E7EB */
+      /* Text */
+      --foreground: 210 40% 96%;
+      /* #E5E7EB */
 
-    /* Muted text */
-    --muted: 215 20% 65%; /* #94A3B8 */
+      /* Muted text */
+      --muted: 215 20% 65%;
+      /* #94A3B8 */
 
-    /* Borders */
-    --border: 215 28% 17%; /* #1F2933 */
+      /* Borders */
+      --border: 215 28% 17%;
+      /* #1F2933 */
 
-    /* Inputs */
-    --input: 222 47% 11%;
-  }
+      /* Inputs */
+      --input: 222 47% 11%;
+   }
+}
+
+@theme {
+   --color-primary: hsl(var(--primary));
+   --color-secondary: hsl(var(--secondary));
+   --color-destructive: hsl(var(--destructive));
+   --color-brand-bg: hsl(var(--background));
 }

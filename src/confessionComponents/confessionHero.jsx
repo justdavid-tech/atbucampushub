@@ -39,9 +39,9 @@ export default function ConfessionHero({ stats }) {
   }, []);
 
   const quickStats = [
-    { icon: MessageCircle, label: 'Total Confessions', value: stats?.total || 0, color: 'from-purple-500 to-violet-600' },
-    { icon: TrendingUp, label: 'This Week', value: stats?.thisWeek || 0, color: 'from-blue-500 to-indigo-600' },
-    { icon: Heart, label: 'Total Likes', value: stats?.totalLikes || 0, color: 'from-pink-500 to-rose-600' }
+    { icon: MessageCircle, label: 'Total Confessions', value: stats?.total || 0, color: 'from-primary to-primary/80' },
+    { icon: TrendingUp, label: 'This Week', value: stats?.thisWeek || 0, color: 'from-primary to-primary/80' },
+    { icon: Heart, label: 'Total Likes', value: stats?.totalLikes || 0, color: 'from-primary to-primary/80' }
   ];
 
   return (
@@ -76,15 +76,15 @@ export default function ConfessionHero({ stats }) {
         {/* Hero Content */}
         <div className="text-center max-w-4xl mx-auto py-12 lg:py-16">
           {/* Lock Icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 backdrop-blur-sm mb-6 animate-float">
-            <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-purple-400" />
+          <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full  border border-primary backdrop-blur-sm mb-6 animate-float">
+            <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
           </div>
 
           {/* Main Heading */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
             <span className="text-white">ATBU</span>
             <br />
-            <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+            <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
               Confessions
             </span>
           </h1>
@@ -129,12 +129,12 @@ export default function ConfessionHero({ stats }) {
           {/* Info Text */}
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400 mb-8">
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-purple-400" />
+              <Lock className="w-4 h-4 text-primary" />
               <span>100% Anonymous</span>
             </div>
             <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
             <div className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 text-pink-400" />
+              <MessageCircle className="w-4 h-4 text-primary" />
               <span>Open Tuesday & Friday</span>
             </div>
             <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
@@ -145,7 +145,7 @@ export default function ConfessionHero({ stats }) {
 
           {/* CTA Button */}
           {isOpen && (
-            <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] animate-fadeIn">
+            <button className="group relative px-8 py-4 bg-gradient-to-r from-primary to-primary/90 text-white rounded-xl font-semibold overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(239,45,86,0.3)] animate-fadeIn">
               <span className="relative z-10 flex items-center justify-center gap-2">
                 <MessageCircle className="w-5 h-5" />
                 Share Your Confession
