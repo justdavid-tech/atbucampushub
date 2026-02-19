@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
@@ -14,6 +13,10 @@ import Academics from './pages/academics'
 import Sports from './pages/sports'
 import Entertainments from './pages/entertainments'
 import ConfessionsPage from './pages/confessions'
+
+import ProductDetail from './pages/ProductDetail'
+import AdminDashboard from './pages/admin/Dashboard'
+import Marketplace from './pages/Marketplace'
 
 // Sign In and Sign Out
 import SignUpPage from './pages/SignUpPage' 
@@ -36,6 +39,12 @@ function App() {
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/confessions" element={<ConfessionsPage />} />
+
+          {/* Product and admin */}
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/marketplace/:categorySlug" element={<Marketplace />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/admin" element={<AdminDashboard />} />  
       </Routes>
     </AuthProvider>
   )
